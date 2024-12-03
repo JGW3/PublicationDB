@@ -1,0 +1,14 @@
+# Customers
+J.Smith|123 Elm Street
+A.Johnson|456 Oak Avenue
+M.Brown|789 Pine Road
+L.Wilson|321 Maple Lane
+E.Davis|654 Birch Boulevard
+
+# Publications
+Texas Weekly|MAGAZINE|weekly
+Science Today|MAGAZINE|monthly
+Health Digest|MAGAZINE|quarterly
+Daily Times|NEWSPAPER|daily
+Weekly Herald|NEWSPAPER|weekly
+Morning News|NEWSPAPER|daily
