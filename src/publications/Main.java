@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     public static String todayDate = LocalDate.now().toString();
+
     public static void main(String[] args) {
         DBLoader.preloadDatabase(); // Preload database
 
@@ -77,6 +78,7 @@ public class Main {
                         address = scanner.nextLine();
                     } else {
                         DBOps.addCustomer(name, address);
+                        DBOps.displayCustomer(DBOps.getLastCustomerId());
                     }
                 }
                 // Edit Customer
@@ -169,6 +171,7 @@ public class Main {
                     System.out.print("Enter publication price: ");
                     double price = Double.parseDouble(scanner.nextLine());
                     DBOps.addPub(name, type, frequency, price);
+                    DBOps.displayPub(DBOps.getLastPubId());
                 }
 
                 // Edit Publication
@@ -233,7 +236,7 @@ public class Main {
             }
 
             switch (choice) {
-                case 1 -> DBOps.displayNewsSubs();
+                case 1 -> DBOps.displayNewsSubscriptions();
                 case 2 -> {
                     System.out.print("Enter customer ID: ");
                     int customerId = Integer.parseInt(scanner.nextLine());
@@ -241,6 +244,9 @@ public class Main {
                     int pubId = Integer.parseInt(scanner.nextLine());
                     System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + todayDate + ": ");
                     String startDate = scanner.nextLine();
+                    if (startDate.isEmpty()) {
+                        startDate = todayDate;
+                    }
                     System.out.print("Enter number of months: ");
                     int noOfMonths = Integer.parseInt(scanner.nextLine());
 
@@ -268,36 +274,59 @@ public class Main {
                     }
 
                     DBOps.addNewsSub(customerId, pubId, startDate, noOfMonths, endDate, totalPrice, subscriptionType);
+                    DBOps.displayNewsSub(customerId, pubId);
                 }
                 case 3 -> {
-                    DBOps.displayNewsSubs();
-                    System.out.print("Enter subscription number to edit: ");
-                    int subNumber = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter new customer ID or press Enter to keep customer ID: ");
-                    if (scanner.hasNextLine()) {
-                        int customerId = Integer.parseInt(scanner.nextLine());
-                        if (customerId == 0) {
-                            customerId = DBOps.getNewsCustId(subNumber);
-                        }
-                        System.out.print("Enter new start date or press Enter to keep start date: ");
-                        String startDate = scanner.nextLine();
-                        if (startDate.isEmpty()) {
-                            startDate = DBOps.getNewsSubStartDate(subNumber);
-                        }
-                        System.out.print("Enter new number of months or press Enter to keep number of months: ");
-                        int noOfMonths = Integer.parseInt(scanner.nextLine());
-                        if (noOfMonths == 0) {
-                            noOfMonths = DBOps.getNewsNoOfMonths(subNumber);
-                        }
-                        DBOps.editNewsSubs(subNumber, customerId, startDate, noOfMonths);
+                    DBOps.displayNewsSubscriptions();
+                    System.out.print("Enter CutomerID of the entry to edit: ");
+                    int customerId = Integer.parseInt(scanner.nextLine());
+                    System.out.print("Enter PublicationID of the entry to edit: ");
+                    int pubId = Integer.parseInt(scanner.nextLine());
+                    DBOps.displayNewsSub(customerId, pubId);
+
+                    System.out.print("Enter new start date or press Enter to keep start date: ");
+                    String startDate = scanner.nextLine();
+                    if (startDate.isEmpty()) {
+                        startDate = DBOps.getNewsSubStartDate(customerId, pubId);
                     }
+                    System.out.print("Enter new number of months or press Enter to keep number of months: ");
+                    int noOfMonths = Integer.parseInt(scanner.nextLine());
+                    if (noOfMonths == 0) {
+                        noOfMonths = DBOps.getNewsNoOfMonths(customerId, pubId);
+                    }
+                    String frequency = DBOps.getPubFreq(pubId);
+                    double basePrice = DBOps.getPubBasePrice(pubId);
+                    double totalPrice = 0.0;
+                    String endDate = SubscriptionUtils.calcNewsEndDate(startDate, noOfMonths);
+                    String subscriptionType = null;
+
+                    if ("daily".equalsIgnoreCase(frequency)) {
+                        System.out.print("Subscription Type (1 for 7-day, 2 for Weekday only, 3 for Weekend only) or press Enter to keep subscription type: ");
+                        int subTypeChoice = Integer.parseInt(scanner.nextLine());
+                        subscriptionType = switch (subTypeChoice) {
+                            case 1 -> "7-day";
+                            case 2 -> "Weekday";
+                            case 3 -> "Weekend";
+                            default -> DBOps.getNewsSubType(customerId, pubId);
+                        };
+                        totalPrice = SubscriptionUtils.calcDailyNewsPrice(basePrice, subscriptionType, noOfMonths);
+                    } else if ("weekly".equalsIgnoreCase(frequency)) {
+                        totalPrice = SubscriptionUtils.calcWeeklyNewsPrice(basePrice, noOfMonths);
+                    }
+                    DBOps.editNewsSub(customerId, pubId, startDate, noOfMonths, endDate, totalPrice, subscriptionType);
                 }
+
+
                 case 4 -> {
-                    DBOps.displayNewsSubs();
-                    System.out.print("Enter subscription number to delete: ");
-                    int subNumber = Integer.parseInt(scanner.nextLine());
-                    System.out.println("Are you sure you want to delete this subscription? (Y/N)");
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deleteNewsSub(subNumber);
+                    DBOps.displayNewsSubscriptions();
+                    System.out.print("Enter CustomerID of subscription to delete: ");
+                    int custID = Integer.parseInt(scanner.nextLine());
+                    System.out.print("Enter PublicationID of subscription to delete: ");
+                    int pubID = Integer.parseInt(scanner.nextLine());
+                    DBOps.displayNewsSub(custID, pubID);
+                    if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                        DBOps.deleteNewsSub(custID, pubID);
+                    }
                 }
                 case 5 -> DBOps.displayCustomers();
                 case 6 -> DBOps.displayNewspapers();
@@ -338,39 +367,43 @@ public class Main {
                     int pubId = Integer.parseInt(scanner.nextLine());
                     System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + todayDate + ": ");
                     String startDate = scanner.nextLine();
+                    if (startDate.isEmpty()) {
+                        startDate = todayDate;
+                    }
                     System.out.print("Enter number of issues: ");
                     int numberOfIssues = Integer.parseInt(scanner.nextLine());
                     DBOps.addMagSub(customerId, pubId, startDate, numberOfIssues);
+                    DBOps.displayMagSub(customerId, pubId);
                 }
                 case 3 -> {
                     DBOps.displayMagSubscriptions();
-                    System.out.print("Enter subscription number to edit: ");
-                    int subNumber = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter new customer ID or press Enter to keep customer ID: ");
-                    if (scanner.hasNextLine()) {
-                        int customerId = Integer.parseInt(scanner.nextLine());
-                        if (customerId == 0) {
-                            customerId = DBOps.getMagCustId(subNumber);
-                        }
-                        System.out.print("Enter new start date or press Enter to keep start date: ");
-                        String startDate = scanner.nextLine();
-                        if (startDate.isEmpty()) {
-                            startDate = DBOps.getMagSubStartDate(subNumber);
-                        }
-                        System.out.print("Enter new number of issues or press Enter to keep number of issues: ");
-                        int numberOfIssues = Integer.parseInt(scanner.nextLine());
-                        if (numberOfIssues == 0) {
-                            numberOfIssues = DBOps.getMagNoOfIssues(subNumber);
-                        }
-                        DBOps.editMagSub(subNumber, customerId, startDate, numberOfIssues);
+                    System.out.print("Enter CutomerID of the entry to edit: ");
+                    int customerId = Integer.parseInt(scanner.nextLine());
+                    System.out.print("Enter PublicationID of the entry to edit: ");
+                    int pubId = Integer.parseInt(scanner.nextLine());
+                    DBOps.displayMagSub(customerId, pubId);
+                    System.out.print("Enter new start date or press Enter to keep start date: ");
+                    String startDate = scanner.nextLine();
+                    if (startDate.isEmpty()) {
+                        startDate = DBOps.getMagSubStartDate(customerId, pubId);
                     }
+                    System.out.print("Enter new number of issues or press Enter to keep number of issues: ");
+                    int numberOfIssues = Integer.parseInt(scanner.nextLine());
+                    if (numberOfIssues == 0) {
+                        numberOfIssues = DBOps.getMagNoOfIssues(customerId, pubId);
+                    }
+                    DBOps.editMagSub(customerId, pubId, startDate, numberOfIssues);
                 }
+
                 case 4 -> {
                     DBOps.displayMagSubscriptions();
-                    System.out.print("Enter subscription number to delete: ");
-                    int subNumber = Integer.parseInt(scanner.nextLine());
+                    System.out.print("Enter CustomerID of subscription to delete: ");
+                    int custID = Integer.parseInt(scanner.nextLine());
+                    System.out.print("Enter PublicationID of subscription to delete: ");
+                    int pubID = Integer.parseInt(scanner.nextLine());
+                    DBOps.displayMagSub(custID, pubID);
                     System.out.println("Are you sure you want to delete this subscription? (Y/N)");
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deleteMagSub(subNumber);
+                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deleteMagSub(custID, pubID);
                 }
                 case 5 -> DBOps.displayCustomers();
                 case 6 -> DBOps.displayMagazines();

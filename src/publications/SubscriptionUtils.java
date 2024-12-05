@@ -5,11 +5,27 @@ import java.time.format.DateTimeFormatter;
 
 public class SubscriptionUtils {
 
-    public static String calcMagEndDate(String startDate, int numberOfIssues) {
-        LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-        LocalDate end = start.plusMonths(numberOfIssues / 12);
-        return end.format(DateTimeFormatter.ISO_DATE);
+    public static String calcMagEndDate(String startDate, int numberOfIssues, String frequency) {
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate endDate;
+
+        switch (frequency.toLowerCase()) {
+            case "monthly":
+                endDate = start.plusMonths(numberOfIssues);
+                break;
+            case "weekly":
+                endDate = start.plusWeeks(numberOfIssues);
+                break;
+            case "quarterly":
+                endDate = start.plusMonths(numberOfIssues * 3);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown frequency: " + frequency);
+        }
+
+        return endDate.toString();
     }
+
 
     public static String calcNewsEndDate(String startDate, int noOfMonths) {
         LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
@@ -29,10 +45,13 @@ public class SubscriptionUtils {
 
 
     public static double calcDailyNewsPrice(double basePrice, String subscriptionType, int noOfMonths) {
+        int daysPerMonth = 30; // Approximate number of days per month
+        int totalDays = daysPerMonth * noOfMonths;
+
         return switch (subscriptionType.toLowerCase()) {
-            case "7-day" -> basePrice * noOfMonths * 4; // Assuming 4 weeks per month
-            case "weekday" -> basePrice * noOfMonths * 4 * 5 / 7; // 5 days out of 7
-            case "weekend" -> basePrice * noOfMonths * 4 * 2 / 7; // 2 days out of 7
+            case "7-day" -> basePrice * totalDays;
+            case "weekday" -> basePrice * (totalDays * 5.0 / 7.0); // 5 weekdays out of 7 days
+            case "weekend" -> basePrice * (totalDays * 2.0 / 7.0); // 2 weekend days out of 7 days
             default -> 0.0;
         };
     }
