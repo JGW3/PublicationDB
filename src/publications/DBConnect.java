@@ -11,7 +11,7 @@ public class DBConnect {
             // Load the SQLite JDBC driver
             Class.forName("org.sqlite.JDBC");
             // Establish a connection to the database
-            String URL = "jdbc:sqlite:src/project.db"; // Ensure this path is correct
+            String URL = "jdbc:sqlite:src/project2.db"; // Ensure this path is correct
             conn = DriverManager.getConnection(URL);
         } catch (ClassNotFoundException e) {
             System.out.println("JDBC Driver not found: " + e.getMessage());
