@@ -4,11 +4,37 @@ A.Johnson|456 Oak Avenue
 M.Brown|789 Pine Road
 L.Wilson|321 Maple Lane
 E.Davis|654 Birch Boulevard
+M.Malard|712 Houston Road
+C.Taylor|987 Spruce Street
+B.Morgan|345 Cedar Court
+D.Harris|567 Walnut Avenue
+N.Green|789 Aspen Drive
+K.White|123 Willow Way
+J.Walker|123 Sunset Boulevard
+A.Turner|456 Golden Gate Avenue
+M.Simmons|789 Maple Leaf Drive
+T.Reed|321 Ocean Breeze Lane
+L.Carter|654 Mountain View Road
+P.Bennett|987 Riverbend Circle
+S.Foster|213 Willow Creek Path
+N.Hayes|345 Birchwood Court
+K.Morgan|567 Elmwood Trail
 
 # Publications
-Texas Weekly|MAGAZINE|weekly
-Science Today|MAGAZINE|monthly
-Health Digest|MAGAZINE|quarterly
-Daily Times|NEWSPAPER|daily
-Weekly Herald|NEWSPAPER|weekly
-Morning News|NEWSPAPER|daily
+Tech Insights|MAGAZINE|monthly|5.00
+Health Digest|MAGAZINE|weekly|2.00
+Travel Explorer|MAGAZINE|quarterly|10.00
+Home & Garden|MAGAZINE|monthly|5.00
+Science Weekly|MAGAZINE|weekly|2.00
+Fashion Forward|MAGAZINE|monthly|5.00
+History Today|MAGAZINE|quarterly|10.00
+Global News Digest|MAGAZINE|weekly|2.00
+Art & Culture|MAGAZINE|quarterly|10.00
+Sports Review|MAGAZINE|monthly|5.00
+Daily Tribune|NEWSPAPER|daily|1.00|7-day
+Morning Herald|NEWSPAPER|weekly|0.50|7-day
+Evening Standard|NEWSPAPER|weekly|0.50|5-day
+City Gazette|NEWSPAPER|daily|1.00|7-day
+National Times|NEWSPAPER|daily|1.00|7-day
+Sunday Journal|NEWSPAPER|weekly|0.50|2-day
+Weekend Observer|NEWSPAPER|weekly|0.50|2-day

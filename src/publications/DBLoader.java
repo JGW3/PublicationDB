@@ -62,20 +62,22 @@ public class DBLoader {
         }
     }
 
-    private static void processPublications(BufferedReader br) throws Exception{
+    private static void processPublications(BufferedReader br) throws Exception {
         String line;
-        while((line = br.readLine()) != null){
+        while ((line = br.readLine()) != null) {
             line = line.trim();
 
             // Stop processing when we reach the next section
-            if (line.isEmpty() || line.startsWith("#")){
+            if (line.isEmpty() || line.startsWith("#")) {
                 break;
             }
             String[] data = line.split("\\|");
             String name = data[0].trim();
             String type = data[1].trim();
             String frequency = data[2].trim();
-            DBOps.addPub(name, type, frequency);
+            double price = Double.parseDouble(data[3].trim());
+
+            DBOps.addPub(name, type, frequency, price);
         }
     }
 
