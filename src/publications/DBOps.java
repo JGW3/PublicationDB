@@ -5,11 +5,20 @@ import java.sql.*;
 public class DBOps {
     /// Customer Operations
     public static void addCustomer(String name, String address) {
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("Error: Customer name cannot be empty.");
+            return;
+        }
+        if (address == null || address.trim().isEmpty()) {
+            System.out.println("Error: Customer address cannot be empty.");
+            return;
+        }
+        
         String sql = "INSERT INTO CUSTOMER (Name, Address) VALUES (?, ?)";
         try (Connection conn = DBConnect.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, address);
+            pstmt.setString(1, name.trim());
+            pstmt.setString(2, address.trim());
             pstmt.executeUpdate();
             System.out.println("Customer added successfully.");
         } catch (SQLException e) {
@@ -54,12 +63,21 @@ public class DBOps {
 
     // Delete Customer
     public static void deleteCustomer(int id) {
+        if (id <= 0) {
+            System.out.println("Error: Invalid customer ID.");
+            return;
+        }
+        
         String sql = "DELETE FROM CUSTOMER WHERE CustomerID = ?";
         try (Connection conn = DBConnect.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-            System.out.println("Customer deleted successfully.");
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Customer deleted successfully.");
+            } else {
+                System.out.println("No customer found with ID: " + id);
+            }
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }

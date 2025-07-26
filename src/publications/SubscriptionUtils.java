@@ -17,7 +17,7 @@ public class SubscriptionUtils {
                 endDate = start.plusWeeks(numberOfIssues);
                 break;
             case "quarterly":
-                endDate = start.plusMonths(numberOfIssues * 3);
+                endDate = start.plusMonths(numberOfIssues * 3L);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown frequency: " + frequency);

@@ -4,7 +4,56 @@ import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
-    public static String todayDate = LocalDate.now().toString();
+    private static final String TODAY_DATE = LocalDate.now().toString();
+
+    private static int getValidInteger(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+    private static double getValidDouble(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                double value = Double.parseDouble(scanner.nextLine().trim());
+                if (value < 0) {
+                    System.out.println("Price cannot be negative. Please enter a valid price.");
+                    continue;
+                }
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+    private static String getValidAddress(Scanner scanner) {
+        while (true) {
+            System.out.print("Enter customer address: ");
+            String address = scanner.nextLine().trim();
+            if (address.isEmpty()) {
+                System.out.println("Address cannot be empty.");
+                continue;
+            }
+            if (address.length() > 40) {
+                System.out.println("Error: Address cannot be longer than 40 characters.");
+                continue;
+            }
+            return address;
+        }
+    }
+
+    private static boolean confirmAction(Scanner scanner, String message) {
+        System.out.println(message + " (Y/N)");
+        String response = scanner.nextLine().trim();
+        return response.equalsIgnoreCase("Y") || response.equalsIgnoreCase("YES");
+    }
 
     public static void main(String[] args) {
         DBLoader.preloadDatabase(); // Preload database
@@ -20,15 +69,8 @@ public class Main {
             System.out.println("4. Magazine Subscriptions");
             System.out.println("5. Database Operations");
             System.out.println("0. Exit");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
                 case 1 -> customerOperations(scanner);
@@ -53,15 +95,8 @@ public class Main {
             System.out.println("3. Edit Customer");
             System.out.println("4. Delete Customer");
             System.out.println("0. Return to Main Menu");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
                 // View All Customers
@@ -69,23 +104,23 @@ public class Main {
                 // Add Customer
                 case 2 -> {
                     System.out.print("Enter customer name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter customer address: ");
-                    String address = scanner.nextLine();
-                    if (address.length() > 40) {
-                        System.out.println("Error: Address cannot be longer than 40 characters.\n" +
-                                "Enter customer address: ");
-                        address = scanner.nextLine();
-                    } else {
-                        DBOps.addCustomer(name, address);
-                        DBOps.displayCustomer(DBOps.getLastCustomerId());
+                    String name = scanner.nextLine().trim();
+                    if (name.isEmpty()) {
+                        System.out.println("Customer name cannot be empty.");
+                        break;
                     }
+                    String address = getValidAddress(scanner);
+                    DBOps.addCustomer(name, address);
+                    DBOps.displayCustomer(DBOps.getLastCustomerId());
                 }
                 // Edit Customer
                 case 3 -> {
                     DBOps.displayCustomers();
-                    System.out.print("Enter customer ID to edit: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
+                    int customerId = getValidInteger(scanner, "Enter customer ID to edit: ");
+                    if (customerId <= 0) {
+                        System.out.println("Invalid customer ID.");
+                        break;
+                    }
                     System.out.print("Enter new name or press Enter to keep name: ");
                     String name = scanner.nextLine();
                     if (name.isEmpty()) {
@@ -101,10 +136,14 @@ public class Main {
                 // Delete Customer
                 case 4 -> {
                     DBOps.displayCustomers();
-                    System.out.print("Enter customer ID to delete: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
-                    System.out.println("Are you sure you want to delete this customer? (Y/N)");
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deleteCustomer(customerId);
+                    int customerId = getValidInteger(scanner, "Enter customer ID to delete: ");
+                    if (customerId <= 0) {
+                        System.out.println("Invalid customer ID.");
+                        break;
+                    }
+                    if (confirmAction(scanner, "Are you sure you want to delete this customer?")) {
+                        DBOps.deleteCustomer(customerId);
+                    }
                 }
                 case 0 -> {
                     return;
@@ -122,30 +161,29 @@ public class Main {
             System.out.println("3. Edit Publication");
             System.out.println("4. Delete Publication");
             System.out.println("0. Return to Main Menu");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
                 case 1 -> DBOps.displayPublications();
                 // Add Publication with options for Magazine or Newspaper
                 case 2 -> {
                     System.out.print("Enter publication name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Publication type - 1 for Newspaper, 2 for Magazine: ");
-                    int typeChoice = Integer.parseInt(scanner.nextLine());
+                    String name = scanner.nextLine().trim();
+                    if (name.isEmpty()) {
+                        System.out.println("Publication name cannot be empty.");
+                        break;
+                    }
+                    int typeChoice = getValidInteger(scanner, "Publication type - 1 for Newspaper, 2 for Magazine: ");
+                    if (typeChoice != 1 && typeChoice != 2) {
+                        System.out.println("Invalid choice. Please select 1 or 2.");
+                        break;
+                    }
                     String type = (typeChoice == 1) ? "NEWSPAPER" : "MAGAZINE";
 
                     String frequency = null;
                     if ("NEWSPAPER".equalsIgnoreCase(type)) {
-                        System.out.print("Enter publication frequency (1 for daily, 2 for weekly): ");
-                        int freqChoice = Integer.parseInt(scanner.nextLine());
+                        int freqChoice = getValidInteger(scanner, "Enter publication frequency (1 for daily, 2 for weekly): ");
                         switch (freqChoice) {
                             case 1 -> frequency = "daily";
                             case 2 -> frequency = "weekly";
@@ -155,8 +193,7 @@ public class Main {
                             }
                         }
                     } else {
-                        System.out.print("Enter publication frequency (1 for weekly, 2 for monthly, 3 for quarterly): ");
-                        int freqChoice = Integer.parseInt(scanner.nextLine());
+                        int freqChoice = getValidInteger(scanner, "Enter publication frequency (1 for weekly, 2 for monthly, 3 for quarterly): ");
                         switch (freqChoice) {
                             case 1 -> frequency = "weekly";
                             case 2 -> frequency = "monthly";
@@ -168,8 +205,7 @@ public class Main {
                         }
                     }
 
-                    System.out.print("Enter publication price: ");
-                    double price = Double.parseDouble(scanner.nextLine());
+                    double price = getValidDouble(scanner, "Enter publication price: ");
                     DBOps.addPub(name, type, frequency, price);
                     DBOps.displayPub(DBOps.getLastPubId());
                 }
@@ -177,8 +213,11 @@ public class Main {
                 // Edit Publication
                 case 3 -> {
                     DBOps.displayPublications();
-                    System.out.print("Enter publication ID to edit: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
+                    int pubId = getValidInteger(scanner, "Enter publication ID to edit: ");
+                    if (pubId <= 0) {
+                        System.out.println("Invalid publication ID.");
+                        break;
+                    }
                     System.out.print("Enter new name or press Enter to keep name: ");
                     String name = scanner.nextLine();
                     if (name.isEmpty()) {
@@ -196,16 +235,32 @@ public class Main {
                     }
                     System.out.print("Enter new price or press Enter to keep price: ");
                     String priceInput = scanner.nextLine();
-                    double price = priceInput.isEmpty() ? -1 : Double.parseDouble(priceInput);
+                    double price = -1;
+                    if (!priceInput.isEmpty()) {
+                        try {
+                            price = Double.parseDouble(priceInput);
+                            if (price < 0) {
+                                System.out.println("Price cannot be negative. Keeping current price.");
+                                price = -1;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid price format. Keeping current price.");
+                            price = -1;
+                        }
+                    }
                     DBOps.editPub(pubId, name, type, frequency, price);
                 }
                 // Delete Publication
                 case 4 -> {
                     DBOps.displayPublications();
-                    System.out.print("Enter publication ID to delete: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
-                    System.out.println("Are you sure you want to delete this publication? (Y/N)");
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deletePub(pubId);
+                    int pubId = getValidInteger(scanner, "Enter publication ID to delete: ");
+                    if (pubId <= 0) {
+                        System.out.println("Invalid publication ID.");
+                        break;
+                    }
+                    if (confirmAction(scanner, "Are you sure you want to delete this publication?")) {
+                        DBOps.deletePub(pubId);
+                    }
                 }
                 case 0 -> {
                     return;
@@ -225,30 +280,32 @@ public class Main {
             System.out.println("5. View All Customers");
             System.out.println("6. View All Newspapers");
             System.out.println("0. Return to Main Menu");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
                 case 1 -> DBOps.displayNewsSubscriptions();
                 case 2 -> {
-                    System.out.print("Enter customer ID: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter publication ID: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + todayDate + ": ");
+                    int customerId = getValidInteger(scanner, "Enter customer ID: ");
+                    if (customerId <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubId = getValidInteger(scanner, "Enter publication ID: ");
+                    if (pubId <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
+                    System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + TODAY_DATE + ": ");
                     String startDate = scanner.nextLine();
                     if (startDate.isEmpty()) {
-                        startDate = todayDate;
+                        startDate = TODAY_DATE;
                     }
-                    System.out.print("Enter number of months: ");
-                    int noOfMonths = Integer.parseInt(scanner.nextLine());
+                    int noOfMonths = getValidInteger(scanner, "Enter number of months: ");
+                    if (noOfMonths <= 0) {
+                        System.out.println("Number of months must be a positive number.");
+                        break;
+                    }
 
                     String frequency = DBOps.getPubFreq(pubId);
                     double basePrice = DBOps.getPubBasePrice(pubId);
@@ -257,8 +314,7 @@ public class Main {
                     String subscriptionType = null;
 
                     if ("daily".equalsIgnoreCase(frequency)) {
-                        System.out.print("Subscription Type (1 for 7-day, 2 for Weekday only, 3 for Weekend only): ");
-                        int subTypeChoice = Integer.parseInt(scanner.nextLine());
+                        int subTypeChoice = getValidInteger(scanner, "Subscription Type (1 for 7-day, 2 for Weekday only, 3 for Weekend only): ");
                         subscriptionType = switch (subTypeChoice) {
                             case 1 -> "7-day";
                             case 2 -> "Weekday";
@@ -278,10 +334,16 @@ public class Main {
                 }
                 case 3 -> {
                     DBOps.displayNewsSubscriptions();
-                    System.out.print("Enter CutomerID of the entry to edit: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter PublicationID of the entry to edit: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
+                    int customerId = getValidInteger(scanner, "Enter CustomerID of the entry to edit: ");
+                    if (customerId <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubId = getValidInteger(scanner, "Enter PublicationID of the entry to edit: ");
+                    if (pubId <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
                     DBOps.displayNewsSub(customerId, pubId);
 
                     System.out.print("Enter new start date or press Enter to keep start date: ");
@@ -290,9 +352,21 @@ public class Main {
                         startDate = DBOps.getNewsSubStartDate(customerId, pubId);
                     }
                     System.out.print("Enter new number of months or press Enter to keep number of months: ");
-                    int noOfMonths = Integer.parseInt(scanner.nextLine());
-                    if (noOfMonths == 0) {
+                    String monthsInput = scanner.nextLine().trim();
+                    int noOfMonths;
+                    if (monthsInput.isEmpty()) {
                         noOfMonths = DBOps.getNewsNoOfMonths(customerId, pubId);
+                    } else {
+                        try {
+                            noOfMonths = Integer.parseInt(monthsInput);
+                            if (noOfMonths <= 0) {
+                                System.out.println("Number of months must be a positive number. Keeping current value.");
+                                noOfMonths = DBOps.getNewsNoOfMonths(customerId, pubId);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Keeping current number of months.");
+                            noOfMonths = DBOps.getNewsNoOfMonths(customerId, pubId);
+                        }
                     }
                     String frequency = DBOps.getPubFreq(pubId);
                     double basePrice = DBOps.getPubBasePrice(pubId);
@@ -302,12 +376,27 @@ public class Main {
 
                     if ("daily".equalsIgnoreCase(frequency)) {
                         System.out.print("Subscription Type (1 for 7-day, 2 for Weekday only, 3 for Weekend only) or press Enter to keep subscription type: ");
-                        int subTypeChoice = Integer.parseInt(scanner.nextLine());
+                        String subTypeInput = scanner.nextLine().trim();
+                        int subTypeChoice;
+                        if (subTypeInput.isEmpty()) {
+                            subTypeChoice = 0; // Keep current
+                        } else {
+                            try {
+                                subTypeChoice = Integer.parseInt(subTypeInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Keeping current subscription type.");
+                                subTypeChoice = 0; // Keep current
+                            }
+                        }
                         subscriptionType = switch (subTypeChoice) {
                             case 1 -> "7-day";
                             case 2 -> "Weekday";
                             case 3 -> "Weekend";
-                            default -> DBOps.getNewsSubType(customerId, pubId);
+                            case 0 -> DBOps.getNewsSubType(customerId, pubId); // Keep current
+                            default -> {
+                                System.out.println("Invalid choice. Keeping current subscription type.");
+                                yield DBOps.getNewsSubType(customerId, pubId);
+                            }
                         };
                         totalPrice = SubscriptionUtils.calcDailyNewsPrice(basePrice, subscriptionType, noOfMonths);
                     } else if ("weekly".equalsIgnoreCase(frequency)) {
@@ -319,12 +408,18 @@ public class Main {
 
                 case 4 -> {
                     DBOps.displayNewsSubscriptions();
-                    System.out.print("Enter CustomerID of subscription to delete: ");
-                    int custID = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter PublicationID of subscription to delete: ");
-                    int pubID = Integer.parseInt(scanner.nextLine());
+                    int custID = getValidInteger(scanner, "Enter CustomerID of subscription to delete: ");
+                    if (custID <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubID = getValidInteger(scanner, "Enter PublicationID of subscription to delete: ");
+                    if (pubID <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
                     DBOps.displayNewsSub(custID, pubID);
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                    if (confirmAction(scanner, "Are you sure you want to delete this subscription?")) {
                         DBOps.deleteNewsSub(custID, pubID);
                     }
                 }
@@ -348,39 +443,47 @@ public class Main {
             System.out.println("5. View All Customers");
             System.out.println("6. View All Magazines");
             System.out.println("0. Return to Main Menu");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
                 case 1 -> DBOps.displayMagSubscriptions();
                 case 2 -> {
-                    System.out.print("Enter customer ID: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter publication ID: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + todayDate + ": ");
+                    int customerId = getValidInteger(scanner, "Enter customer ID: ");
+                    if (customerId <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubId = getValidInteger(scanner, "Enter publication ID: ");
+                    if (pubId <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
+                    System.out.print("Enter subscription start date (YYYY-MM-DD) or press ENTER for today " + TODAY_DATE + ": ");
                     String startDate = scanner.nextLine();
                     if (startDate.isEmpty()) {
-                        startDate = todayDate;
+                        startDate = TODAY_DATE;
                     }
-                    System.out.print("Enter number of issues: ");
-                    int numberOfIssues = Integer.parseInt(scanner.nextLine());
+                    int numberOfIssues = getValidInteger(scanner, "Enter number of issues: ");
+                    if (numberOfIssues <= 0) {
+                        System.out.println("Number of issues must be a positive number.");
+                        break;
+                    }
                     DBOps.addMagSub(customerId, pubId, startDate, numberOfIssues);
                     DBOps.displayMagSub(customerId, pubId);
                 }
                 case 3 -> {
                     DBOps.displayMagSubscriptions();
-                    System.out.print("Enter CutomerID of the entry to edit: ");
-                    int customerId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter PublicationID of the entry to edit: ");
-                    int pubId = Integer.parseInt(scanner.nextLine());
+                    int customerId = getValidInteger(scanner, "Enter CustomerID of the entry to edit: ");
+                    if (customerId <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubId = getValidInteger(scanner, "Enter PublicationID of the entry to edit: ");
+                    if (pubId <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
                     DBOps.displayMagSub(customerId, pubId);
                     System.out.print("Enter new start date or press Enter to keep start date: ");
                     String startDate = scanner.nextLine();
@@ -388,22 +491,41 @@ public class Main {
                         startDate = DBOps.getMagSubStartDate(customerId, pubId);
                     }
                     System.out.print("Enter new number of issues or press Enter to keep number of issues: ");
-                    int numberOfIssues = Integer.parseInt(scanner.nextLine());
-                    if (numberOfIssues == 0) {
+                    String issuesInput = scanner.nextLine().trim();
+                    int numberOfIssues;
+                    if (issuesInput.isEmpty()) {
                         numberOfIssues = DBOps.getMagNoOfIssues(customerId, pubId);
+                    } else {
+                        try {
+                            numberOfIssues = Integer.parseInt(issuesInput);
+                            if (numberOfIssues <= 0) {
+                                System.out.println("Number of issues must be a positive number. Keeping current value.");
+                                numberOfIssues = DBOps.getMagNoOfIssues(customerId, pubId);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Keeping current number of issues.");
+                            numberOfIssues = DBOps.getMagNoOfIssues(customerId, pubId);
+                        }
                     }
                     DBOps.editMagSub(customerId, pubId, startDate, numberOfIssues);
                 }
 
                 case 4 -> {
                     DBOps.displayMagSubscriptions();
-                    System.out.print("Enter CustomerID of subscription to delete: ");
-                    int custID = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Enter PublicationID of subscription to delete: ");
-                    int pubID = Integer.parseInt(scanner.nextLine());
+                    int custID = getValidInteger(scanner, "Enter CustomerID of subscription to delete: ");
+                    if (custID <= 0) {
+                        System.out.println("Customer ID must be a positive number.");
+                        break;
+                    }
+                    int pubID = getValidInteger(scanner, "Enter PublicationID of subscription to delete: ");
+                    if (pubID <= 0) {
+                        System.out.println("Publication ID must be a positive number.");
+                        break;
+                    }
                     DBOps.displayMagSub(custID, pubID);
-                    System.out.println("Are you sure you want to delete this subscription? (Y/N)");
-                    if (scanner.nextLine().equalsIgnoreCase("Y")) DBOps.deleteMagSub(custID, pubID);
+                    if (confirmAction(scanner, "Are you sure you want to delete this subscription?")) {
+                        DBOps.deleteMagSub(custID, pubID);
+                    }
                 }
                 case 5 -> DBOps.displayCustomers();
                 case 6 -> DBOps.displayMagazines();
@@ -421,18 +543,15 @@ public class Main {
             System.out.println("1. Clear All Tables");
             System.out.println("2. Reload Database");
             System.out.println("0. Return to Main Menu");
-            System.out.print("Choose an option: ");
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                continue;
-            }
+            int choice = getValidInteger(scanner, "Choose an option: ");
 
             switch (choice) {
-                case 1 -> DBOps.clearAllTables();
+                case 1 -> {
+                    if (confirmAction(scanner, "Are you sure you want to clear all tables? This will delete all data.")) {
+                        DBOps.clearAllTables();
+                    }
+                }
                 case 2 -> DBLoader.preloadDatabase();
                 case 0 -> {
                     return;

@@ -31,10 +31,10 @@ History Today|MAGAZINE|quarterly|10.00
 Global News Digest|MAGAZINE|weekly|2.00
 Art & Culture|MAGAZINE|quarterly|10.00
 Sports Review|MAGAZINE|monthly|5.00
-Daily Tribune|NEWSPAPER|daily|1.00|7-day
-Morning Herald|NEWSPAPER|weekly|0.50|7-day
-Evening Standard|NEWSPAPER|weekly|0.50|5-day
-City Gazette|NEWSPAPER|daily|1.00|7-day
-National Times|NEWSPAPER|daily|1.00|7-day
-Sunday Journal|NEWSPAPER|weekly|0.50|2-day
-Weekend Observer|NEWSPAPER|weekly|0.50|2-day
+Daily Tribune|NEWSPAPER|daily|1.00
+Morning Herald|NEWSPAPER|weekly|0.50
+Evening Standard|NEWSPAPER|weekly|0.50
+City Gazette|NEWSPAPER|daily|1.00
+National Times|NEWSPAPER|daily|1.00
+Sunday Journal|NEWSPAPER|weekly|0.50
+Weekend Observer|NEWSPAPER|weekly|0.50
