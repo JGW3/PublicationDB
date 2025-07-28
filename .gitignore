@@ -2,6 +2,12 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/
+*.iml
+
+# Logs and system files
+*.log
+*.DS_Store
 
 ### Eclipse ###
 .apt_generated
@@ -28,10 +34,8 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-## Java ###
+# Java build output
 *.class
 /out/
 /target/
-.idea/
-/*.iml.idea/
-*.class
+/build/
